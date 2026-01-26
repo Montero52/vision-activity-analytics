@@ -80,7 +80,7 @@ The project follows the **Separation of Concerns (SoC)** principle:
 git clone https://github.com/Montero52/employee-tracker.git
 cd employee-tracker
 
-python -m venv venv
+python -m venv .venv
 # Windows: venv\Scripts\activate | Linux: source venv/bin/activate
 
 pip install -r requirements.txt
