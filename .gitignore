@@ -1,0 +1,44 @@
+# === 1. AI Models (Nặng & có thể tải lại được) ===
+models/*.pt
+models/*.onnx
+*.weights
+
+# === 2. Database & Config cá nhân ===
+# Chặn database nhưng CÓ THỂ giữ lại file JSON cấu hình vùng nếu bạn muốn chia sẻ mẫu
+data/*.db
+data/employees.db
+data/reports/*
+# data/*_zones.json  <-- Bỏ comment nếu bạn muốn giữ bí mật các vùng đã vẽ
+
+# === 3. Media & Videos (Trọng tâm tối ưu Repo) ===
+# Giữ cấu trúc folder nhưng chặn nội dung bên trong
+data/uploads/*
+!data/uploads/.gitkeep
+
+data/outputs/*
+!data/outputs/.gitkeep
+
+data/reports/*
+!data/reports/.gitkeep
+
+# Chặn mọi định dạng video ở bất kỳ đâu
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# === 4. Python & System ===
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+.env
+.DS_Store
+Thumbs.db
+
+# === 5. IDE Config ===
+.vscode/
+.idea/
+*.swp

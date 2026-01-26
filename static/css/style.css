@@ -1,0 +1,34 @@
+:root { 
+    --primary-color: #2563eb; 
+    --bg-light: #f1f5f9; 
+}
+
+body { 
+    background-color: var(--bg-light); 
+    font-family: 'Inter', sans-serif; 
+    overflow-x: hidden; 
+}
+
+/* Header & Cards */
+.header-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 1rem 0; margin-bottom: 2rem; }
+.card { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: 0.3s; }
+.card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+/* Video Display */
+.video-wrapper { 
+    background: #1e293b; border-radius: 12px; overflow: hidden; 
+    position: relative; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+}
+.video-wrapper img, .video-wrapper video { width: 100%; height: 100%; object-fit: contain; }
+
+/* Utilities */
+.scroll-area { height: 400px; overflow-y: auto; scrollbar-width: thin; }
+.table thead { position: sticky; top: 0; background: #fff; z-index: 10; }
+
+#loading-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85);
+    z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
+}
+
+.emp-list-item { transition: 0.2s; border-radius: 8px; }
+.emp-list-item:hover { background-color: #f8fafc; }

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Tracker | AI Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+        <p class="mt-3 fw-bold text-dark text-uppercase">Hệ thống đang xử lý AI...</p>
+        <small class="text-muted">Vui lòng không tắt trình duyệt cho đến khi hoàn tất.</small>
+    </div>
+
+    <header class="header-bar shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0 fw-bold text-dark"><i class="bi bi-shield-check text-primary me-2"></i>EMPLOYEE TRACKER</h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import Nhân Sự
+                </button>
+                <a href="/export_report" class="btn btn-outline-primary btn-sm fw-bold">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Xuất Báo Cáo Excel
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-2">
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="card p-4 mb-4 shadow-sm border-start border-primary border-4">
+                    <form method="POST" action="/upload" enctype="multipart/form-data" onsubmit="showLoading()">
+                        <label class="form-label fw-bold text-secondary mb-3">Tải lên Video giám sát mới</label>
+                        <div class="row g-2">
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" name="video" accept="video/*" required>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary w-100 fw-bold" type="submit">Tải Lên</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card mb-4 overflow-hidden border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                        <span class="fw-bold text-dark small text-uppercase"><i class="bi bi-display me-2"></i>Màn hình hiển thị AI</span>
+                        <div id="active-video-name" class="badge bg-primary rounded-pill px-3">Sẵn sàng</div>
+                    </div>
+                    <div class="video-wrapper" id="video-container">
+                        <div class="text-center text-white-50">
+                            <i class="bi bi-camera-reels h1 d-block mb-3"></i>
+                            <p class="small">Chọn video từ thư viện để bắt đầu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3 text-uppercase text-secondary small"><i class="bi bi-cloud-upload me-2"></i>Video Gốc (Chưa xử lý)</h6>
+                <div class="row g-3 mb-4" id="video-library">
+                    {% for file in uploaded_files %}
+                    <div class="col-md-12">
+                        <div class="card p-3 border shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{ file }}</span>
+                                <div class="btn-group">
+                                    <button onclick="startStream('{{ file }}')" class="btn btn-sm btn-primary px-3 shadow-sm">Live AI</button>
+                                    <a href="/process_offline/{{ file }}" class="btn btn-sm btn-dark px-3 shadow-sm" onclick="showLoading()">Xử lý</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h6 class="fw-bold mb-3 text-uppercase text-success small"><i class="bi bi-check2-all me-2"></i>Kết Quả Phân Tích (Outputs)</h6>
+                <div class="row g-3 mb-5" id="result-library">
+                    {% for file in result_files %}
+                    <div class="col-md-12">
+                        <div class="card p-3 border-start border-success border-4 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-truncate" style="max-width: 65%;">
+                                    <span class="fw-bold d-block text-dark small">{{ file }}</span>
+                                    <span class="badge bg-success-subtle text-success border-0 p-0" style="font-size: 0.7rem;">
+                                        <i class="bi bi-tag-fill me-1"></i>Phiên #{{ file.split('_')[1] }}
+                                    </span>
+                                </div>
+                                <div class="btn-group">
+                                    <button onclick="playResult('{{ file }}')" class="btn btn-sm btn-success px-3 shadow-sm">Xem KQ</button>
+                                    <a href="/download_output/{{ file }}" class="btn btn-sm btn-outline-success px-2 shadow-sm"><i class="bi bi-download"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 fw-bold text-primary border-bottom">
+                        <i class="bi bi-clipboard-pulse me-2"></i>NHẬT KÝ THEO PHIÊN
+                    </div>
+                    <div class="scroll-area">
+                        <table class="table table-hover mb-0 small">
+                            <thead class="table-light">
+                                <tr><th>Giờ</th><th>Nhân viên</th><th>Trạng thái</th></tr>
+                            </thead>
+                            <tbody id="log-body">
+                                {% for row in actions %}
+                                <tr>
+                                    <td class="text-muted">{{ row['timestamp'].split(' ')[1] }}</td>
+                                    <td>
+                                        <span class="fw-bold text-dark">{{ row['employee_id'] }}</span>
+                                        <small class="d-block text-muted">{{ row['full_name'] or 'Chưa rõ' }}</small>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border-0">{{ row['action'] }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 fw-bold border-bottom d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-people-fill me-2"></i>QUẢN LÝ NHÂN SỰ</span>
+                        <span class="badge bg-light text-muted fw-normal">{{ emp_map|length }} người</span>
+                    </div>
+                    <div class="p-3 scroll-area" style="height: 350px;" id="employee-list-container">
+                        {% for id, name in emp_map.items() %}
+                        <form action="/employees" method="POST" class="emp-list-item p-2 mb-1 border-bottom">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-3 fw-bold text-primary small">{{ id }}</div>
+                                <div class="col-7">
+                                    <input type="hidden" name="emp_id" value="{{ id }}">
+                                    <input type="text" name="full_name" class="form-control form-control-sm border-0 bg-transparent p-0" value="{{ name }}" placeholder="Nhập tên...">
+                                </div>
+                                <div class="col-2 text-end">
+                                    <button class="btn btn-sm btn-link p-0 text-primary" type="submit"><i class="bi bi-check-lg"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow-lg">
+                <form action="/import_employees" method="POST" enctype="multipart/form-data">
+                    <div class="modal-header bg-dark text-white border-0">
+                        <h5 class="modal-title">Import danh sách nhân sự</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <div class="text-center mb-4"><i class="bi bi-file-earmark-arrow-up text-primary h1"></i></div>
+                        <input type="file" name="file" class="form-control" accept=".csv, .xlsx" required>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary fw-bold">Import ngay</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
