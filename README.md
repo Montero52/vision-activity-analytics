@@ -121,4 +121,4 @@ This project is licensed under the **MIT License**. It is free to use for academ
 
 ## Author
 
-**Trần Nhật Quý** *Computer Science Student | Duy Tan University* | [LinkedIn](https://www.linkedin.com/in/trannhatquy) | [GitHub](https://github.com/Montero52)  | [Email](mailto:trannhatquy0@gmail.com)
+**Trần Nhật Quý** *Computer Science Student | Duy Tan University* | [LinkedIn](https://www.linkedin.com/in/trannhatquy) | [GitHub](https://github.com/Montero52)  | [trannhatquy0@gmail.com](mailto:trannhatquy0@gmail.com)
