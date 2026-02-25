@@ -20,28 +20,38 @@ def click_event(event, x, y, flags, param):
 
 def get_paths():
     """
-    Tu dong tim duong dan video va JSON dua tren thu muc goc cua du an.
+    Tu dong tim duong dan video va JSON dua tren thu muc goc cua du an. 
     """
+    data_dir = os.path.join(ROOT_DIR, 'data')
+    uploads_dir = os.path.join(data_dir, 'uploads')
     video_path = None
     
     # 1. Lay duong dan video tu tham so hoac mac dinh
     if len(sys.argv) > 1:
         # Neu truyen tham so, kiem tra ca duong dan tuong doi va tuyet doi
         input_arg = sys.argv[1]
-        if os.path.isabs(input_arg):
+
+        potential_path = os.path.join(uploads_dir, input_arg)
+
+        if os.path.exists(potential_path):
+            video_path = potential_path
+        elif os.path.exists(input_arg): # Nếu gõ đường dẫn đầy đủ
             video_path = input_arg
         else:
-            video_path = os.path.join(ROOT_DIR, input_arg)
-    else:
-        # Mac dinh tim trong ROOT/uploads/demo_1.mp4
-        video_path = os.path.join(ROOT_DIR, 'uploads', 'demo_1.mp4')
+            print(f"[-] Khong tim thay: {input_arg} trong thu muc uploads/")
 
-    if not os.path.exists(video_path):
-        # Thu tim file bat ky trong ROOT/uploads/
-        uploads_dir = os.path.join(ROOT_DIR, 'uploads')
-        if os.path.exists(uploads_dir):
-            files = [os.path.join(uploads_dir, f) for f in os.listdir(uploads_dir) if f.endswith('.mp4')]
-            if files: video_path = files[0]
+    if not video_path:
+            if os.path.exists(uploads_dir):
+                files = [f for f in os.listdir(uploads_dir) if f.lower().endswith('.mp4')]
+                if files:
+                    print("\n[*] Goi y: Ban co the go 'python .\scripts\draw_zones.py <ten_file.mp4>'")
+                    print("--- DANH SACH VIDEO HIEN CO ---")
+                    for i, f in enumerate(files):
+                        print(f"{i+1}. {f}")
+                    
+                    choice = input("\nNhap so thu tu de mo (mac dinh 1): ")
+                    idx = int(choice) - 1 if choice.isdigit() and 0 < int(choice) <= len(files) else 0
+                    video_path = os.path.join(uploads_dir, files[idx])
 
     if not video_path or not os.path.exists(video_path):
         return None, None
@@ -82,9 +92,15 @@ def main():
         print(f"LOI: OpenCV khong the doc frame tu: {video_path}")
         return
 
-    cv2.namedWindow("Draw Zones")
+    cv2.namedWindow("Draw Zones", cv2.WINDOW_NORMAL)
     cv2.setMouseCallback("Draw Zones", click_event)
 
+    cv2.setWindowProperty("Draw Zones", cv2.WND_PROP_TOPMOST, 1)
+    # Tùy chọn: Đợi 1ms để Windows kịp nhận diện
+    cv2.waitKey(1) 
+    # Tắt chế độ luôn trên cùng để bạn vẫn có thể chuyển đổi giữa các tab khác
+    cv2.setWindowProperty("Draw Zones", cv2.WND_PROP_TOPMOST, 0)
+    
     print("\n" + "="*45)
     print(f"PROJECT ROOT: {ROOT_DIR}")
     print(f"DANG MO: {os.path.basename(video_path)}")
