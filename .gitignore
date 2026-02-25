@@ -2,6 +2,7 @@
 models/*.pt
 models/*.onnx
 *.weights
+*yolov8n_openvino_model
 
 # === 2. Database & Config cá nhân ===
 # Chặn database nhưng CÓ THỂ giữ lại file JSON cấu hình vùng nếu bạn muốn chia sẻ mẫu
@@ -37,8 +38,10 @@ env/
 .env
 .DS_Store
 Thumbs.db
+kernel.errors.txt
 
 # === 5. IDE Config ===
 .vscode/
 .idea/
 *.swp
+
