@@ -20,13 +20,11 @@
 
     <header class="header-bar shadow-sm">
         <div class="container d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0 fw-bold text-dark"><i class="bi bi-shield-check text-primary me-2"></i>EMPLOYEE TRACKER</h1>
+            <h1 class="h4 mb-0 fw-bold text-dark">EMPLOYEE TRACKER</h1>
             <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import Nhân Sự
+                <button class="btn btn-sm btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#importModal"> Import Nhân Sự
                 </button>
-                <a href="/export_report" class="btn btn-outline-primary btn-sm fw-bold">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Xuất Báo Cáo Excel
+                <a href="/export_report" class="btn btn-outline-primary btn-sm fw-bold"> Xuất Báo Cáo Excel
                 </a>
             </div>
         </div>
@@ -52,7 +50,7 @@
 
                 <div class="card mb-4 overflow-hidden border-0 shadow-sm">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                        <span class="fw-bold text-dark small text-uppercase"><i class="bi bi-display me-2"></i>Màn hình hiển thị AI</span>
+                        <span class="fw-bold text-dark small text-uppercase">Màn hình hiển thị AI</span>
                         <div id="active-video-name" class="badge bg-primary rounded-pill px-3">Sẵn sàng</div>
                     </div>
                     <div class="video-wrapper" id="video-container">
@@ -63,7 +61,7 @@
                     </div>
                 </div>
 
-                <h6 class="fw-bold mb-3 text-uppercase text-secondary small"><i class="bi bi-cloud-upload me-2"></i>Video Gốc (Chưa xử lý)</h6>
+                <h6 class="fw-bold mb-3 text-uppercase text-secondary small">Video Gốc</h6>
                 <div class="row g-3 mb-4" id="video-library">
                     {% for file in uploaded_files %}
                     <div class="col-md-12">
@@ -72,7 +70,13 @@
                                 <span class="fw-bold text-dark text-truncate" style="max-width: 60%;">{{ file }}</span>
                                 <div class="btn-group">
                                     <button onclick="startStream('{{ file }}')" class="btn btn-sm btn-primary px-3 shadow-sm">Live AI</button>
-                                    <a href="/process_offline/{{ file }}" class="btn btn-sm btn-dark px-3 shadow-sm" onclick="showLoading()">Xử lý</a>
+                                    <button onclick="smartProcess('{{ file }}')" class="btn btn-sm btn-dark px-3 shadow-sm">Xử lý</button>
+                                    <a href="{{ url_for('delete_raw_upload', filename=file) }}" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    title="Move to Trash"
+                                    onclick="return confirm('Bạn có chắc muốn đưa tệp gốc này vào thùng rác?')">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -80,21 +84,32 @@
                     {% endfor %}
                 </div>
 
-                <h6 class="fw-bold mb-3 text-uppercase text-success small"><i class="bi bi-check2-all me-2"></i>Kết Quả Phân Tích (Outputs)</h6>
+                <h6 class="fw-bold mb-3 text-uppercase text-success small">Kết Quả Phân Tích</h6>
                 <div class="row g-3 mb-5" id="result-library">
                     {% for file in result_files %}
+                    {% set session_id = file.split('_')[1] %} {# Lấy ID từ tên file để dùng cho nút xóa #}
                     <div class="col-md-12">
                         <div class="card p-3 border-start border-success border-4 shadow-sm">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="text-truncate" style="max-width: 65%;">
+                                <div class="text-truncate" style="max-width: 60%;">
                                     <span class="fw-bold d-block text-dark small">{{ file }}</span>
                                     <span class="badge bg-success-subtle text-success border-0 p-0" style="font-size: 0.7rem;">
-                                        <i class="bi bi-tag-fill me-1"></i>Phiên #{{ file.split('_')[1] }}
+                                        </i>Phiên #{{ session_id }}
                                     </span>
                                 </div>
-                                <div class="btn-group">
-                                    <button onclick="playResult('{{ file }}')" class="btn btn-sm btn-success px-3 shadow-sm">Xem KQ</button>
-                                    <a href="/download_output/{{ file }}" class="btn btn-sm btn-outline-success px-2 shadow-sm"><i class="bi bi-download"></i></a>
+                                
+                                <div class="btn-group shadow-sm">
+                                    <button onclick="playResult('{{ file }}')" class="btn btn-sm btn-success px-3"> </i> Xem KQ </button>
+                                    
+                                    <a href="/download_output/{{ file }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+
+                                    <a href="{{ url_for('delete_output', session_id=session_id) }}" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('Xóa phiên #{{ session_id }} và toàn bộ dữ liệu liên quan?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -105,9 +120,7 @@
 
             <div class="col-lg-4">
                 <div class="card mb-4 border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 fw-bold text-primary border-bottom">
-                        <i class="bi bi-clipboard-pulse me-2"></i>NHẬT KÝ THEO PHIÊN
-                    </div>
+                    <div class="card-header bg-white py-3 fw-bold text-primary border-bottom"> NHẬT KÝ THEO PHIÊN</div>
                     <div class="scroll-area">
                         <table class="table table-hover mb-0 small">
                             <thead class="table-light">
@@ -116,12 +129,18 @@
                             <tbody id="log-body">
                                 {% for row in actions %}
                                 <tr>
-                                    <td class="text-muted">{{ row['timestamp'].split(' ')[1] }}</td>
+                                    <td class="text-muted"><span class="badge bg-dark fw-normal">{{ row['timestamp'].split(' ')[1] }}</span></td>
                                     <td>
                                         <span class="fw-bold text-dark">{{ row['employee_id'] }}</span>
                                         <small class="d-block text-muted">{{ row['full_name'] or 'Chưa rõ' }}</small>
                                     </td>
-                                    <td><span class="badge bg-light text-dark border-0">{{ row['action'] }}</span></td>
+                                    <td>
+                                        {% if 'Rời bàn' in row['action'] %}
+                                            <span class="badge bg-danger-subtle text-danger border-0">{{ row['action'] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success-subtle text-success border-0">{{ row['action'] }}</span>
+                                        {% endif %}
+                                    </td> 
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -131,7 +150,7 @@
 
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3 fw-bold border-bottom d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-people-fill me-2"></i>QUẢN LÝ NHÂN SỰ</span>
+                        <span>QUẢN LÝ NHÂN SỰ</span>
                         <span class="badge bg-light text-muted fw-normal">{{ emp_map|length }} người</span>
                     </div>
                     <div class="p-3 scroll-area" style="height: 350px;" id="employee-list-container">
